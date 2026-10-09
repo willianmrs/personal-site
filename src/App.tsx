@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { articles, localPosts, profiles, selectedArticles } from './content';
-import type { Topic } from './content';
 import { Arrow } from './components/Arrow';
 import { ArticleList } from './components/ArticleList';
 import { DataFlow } from './components/DataFlow';
+import { SocialIcon } from './components/SocialIcon';
 import { formatDate, normalizePath, site } from './lib/site';
+import { createArticleSearch } from './lib/search';
+
+const searchArticles = createArticleSearch(articles);
 
 export function pageMeta(path: string) {
   path = normalizePath(path);
@@ -32,7 +35,10 @@ function Header({ path }: { path: string }) {
     <button ref={toggle} className="menu-toggle" aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(!open)}>{open ? 'Close' : 'Menu'}<span>{open ? '−' : '+'}</span></button>
     <nav id="main-navigation" className={open ? 'navigation open' : 'navigation'} aria-label="Main navigation">
       {[['/', 'Home'], ['/writing', 'Writing'], ['/about', 'About']].map(([href, label]) => <a key={href} href={href} aria-current={(href === '/' ? path === '/' : path.startsWith(href)) ? 'page' : undefined}>{label}</a>)}
-      <ExternalLink to={profiles.github}>GitHub</ExternalLink><ExternalLink to={profiles.linkedin}>LinkedIn</ExternalLink>
+      <div className="nav-socials">{(['github', 'linkedin'] as const).map((name) => {
+        const label = name === 'github' ? 'GitHub' : 'LinkedIn';
+        return <a key={name} className="social-link" href={profiles[name]} aria-label={label} title={label} target="_blank" rel="noopener noreferrer"><SocialIcon name={name} /></a>;
+      })}</div>
     </nav>
   </header>;
 }
@@ -44,7 +50,7 @@ function Footer() {
 function Home() {
   return <>
     <section className="hero" aria-labelledby="home-title">
-      <div className="hero-copy"><p className="eyebrow cyan">// data · systems · people</p><h1 id="home-title">Willian<br />Moreira<span className="cyan">.</span></h1><p className="hero-role">Lead Machine Learning Platform Engineer at iFood.</p><p className="hero-description">I build data and machine learning platforms,<br className="desktop-break" /> with a focus on real-time processing.</p><div className="hero-actions"><a className="button primary" href="/writing">Explore my writing<Arrow /></a><a className="button secondary" href="/about">More about me<Arrow /></a></div></div>
+      <div className="hero-copy"><p className="eyebrow cyan">// data · systems · people</p><h1 id="home-title">Willian<br />Moreira<span className="cyan">.</span></h1><p className="hero-role">ML Platforms &amp; Technical Leadership</p><p className="hero-description">I build real-time ML platforms at scale.</p><div className="hero-actions"><a className="button primary" href="/writing">Explore my writing<Arrow /></a><a className="button secondary" href="/about">More about me<Arrow /></a></div></div>
       <DataFlow />
     </section>
     <section className="home-writing section-rule" aria-labelledby="selected-title"><p className="section-label">01 / SELECTED WRITING</p><div className="section-heading"><h2 id="selected-title">A few ideas, written down<span className="cyan">.</span></h2><a className="text-link" href="/writing">All articles<Arrow /></a></div><ArticleList articles={selectedArticles} compact /></section>
@@ -53,14 +59,22 @@ function Home() {
 }
 
 function Writing() {
-  const [filter, setFilter] = useState<'All' | Topic>('All');
-  const filtered = articles.filter((article) => filter === 'All' || article.topic === filter);
+  const [query, setQuery] = useState('');
+  const searchInput = useRef<HTMLInputElement>(null);
+  const filtered = searchArticles(query);
+  const clearSearch = () => { setQuery(''); searchInput.current?.focus(); };
   return <>
     <section className="page-intro"><p className="eyebrow cyan">// notes from the field</p><h1>Writing<span className="cyan">.</span></h1><p className="page-description">Thoughts on data systems, streaming and machine learning platforms.</p></section>
     <section className="writing-index" aria-label="Articles">
-      <div className="filters" role="group" aria-label="Filter articles by topic">{(['All', 'Data & ML', 'Bitcoin'] as const).map((topic) => <button key={topic} className={`filter-button ${topic === filter ? 'active' : ''}`} aria-pressed={topic === filter} onClick={() => setFilter(topic)}>{topic}</button>)}</div>
+      <div className="article-search" role="search" aria-label="Search writing">
+        <label className="sr-only" htmlFor="article-search">Search articles</label>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4 4" /></svg>
+        <input ref={searchInput} id="article-search" type="search" placeholder="Search articles…" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); clearSearch(); } }} aria-describedby="search-hint" autoComplete="off" spellCheck={false} />
+        {query && <button className="clear-search" type="button" onClick={clearSearch} aria-label="Clear search">×</button>}
+      </div>
+      <p className="search-hint" id="search-hint">Search by title or description.</p>
       <p className="result-count" role="status" aria-live="polite" aria-atomic="true">{filtered.length} {filtered.length === 1 ? 'article' : 'articles'}<span className="count-line" /></p>
-      <ArticleList articles={filtered} />
+      {filtered.length ? <ArticleList articles={filtered} /> : <div className="search-empty"><h2>No articles found.</h2><p>Try a different word or a shorter search.</p><button className="text-link" type="button" onClick={clearSearch}>Clear search<Arrow /></button></div>}
       <p className="writing-note">Some articles were originally published in Portuguese. <span>EN / PT indicates the original language.</span></p>
     </section>
   </>;
@@ -79,8 +93,8 @@ function AboutGraphic() {
 
 function About() {
   return <>
-    <section className="about-intro"><div><p className="eyebrow cyan">// about</p><h1>Data platforms, real-time systems, and the people behind them<span className="cyan">.</span></h1><p>I’m Willian, a Lead Machine Learning Platform Engineer at iFood, based in Campinas, Brazil. I lead the technical delivery and architecture of the Feature Platform, while mentoring engineers and shaping its roadmap.</p></div><AboutGraphic /></section>
-    <div className="background section-rule"><section className="experience" aria-labelledby="experience-title"><h2 className="section-label" id="experience-title">01 / EXPERIENCE</h2><ol className="timeline">{experience.map((job) => <li key={job.date}><span className="timeline-date">{job.date}</span><div className="timeline-detail"><h3>{job.company}</h3><p className="job-role">{job.role}</p><p className="job-description">{job.description}</p></div></li>)}</ol></section><aside className="education"><h2 className="section-label">02 / EDUCATION</h2><div className="education-item"><h3>BSc in Computer Science</h3><p>UTFPR · 2012–2016</p></div><div className="education-item"><h3>Deep Learning Nanodegree</h3><p>Udacity · 2018</p></div><div className="tools"><h2 className="section-label">TOOLS I’VE WORKED WITH</h2><p>Spark · Kafka · Redis<br />Scala · Python · Go</p></div></aside></div>
+    <section className="about-intro"><div><p className="eyebrow cyan">// about</p><h1>Building real-time systems. Leading engineering teams<span className="cyan">.</span></h1><p>I’m Willian, a Lead Machine Learning Platform Engineer at iFood, based in Campinas, Brazil. I lead the technical delivery and architecture of the Feature Platform, while mentoring engineers and shaping its roadmap.</p></div><AboutGraphic /></section>
+    <div className="background section-rule"><section className="experience" aria-labelledby="experience-title"><h2 className="section-label" id="experience-title">01 / EXPERIENCE</h2><ol className="timeline">{experience.map((job) => <li key={job.date}><span className="timeline-date">{job.date}</span><div className="timeline-detail"><h3>{job.company}</h3><p className="job-role">{job.role}</p><p className="job-description">{job.description}</p></div></li>)}</ol></section><aside className="education"><h2 className="section-label">02 / EDUCATION</h2><div className="education-item"><h3>BSc in Computer Science</h3><p>UTFPR · 2012–2016</p></div><div className="tools"><h2 className="section-label">TOOLS I’VE WORKED WITH</h2><p>Spark · Kafka · Redis<br />Scala · Python · Go</p></div></aside></div>
     <section className="connect section-rule"><h2>Let’s connect<span className="cyan">.</span></h2><div className="connect-links"><ExternalLink className="button accent-outline" to={profiles.linkedin}>LinkedIn</ExternalLink><ExternalLink className="button secondary" to={profiles.github}>GitHub</ExternalLink><a className="text-link" href="/writing">Read my writing<Arrow /></a></div></section>
   </>;
 }

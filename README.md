@@ -31,7 +31,7 @@ When adding dependencies, use `npm install <package>` and commit the updated loc
 
 - **Home** (`/`): introduction, animated data flow, selected writing, and links
   to the full writing index and background.
-- **Writing** (`/writing`): article summaries, topic filters, original language
+- **Writing** (`/writing`): article summaries, fuzzy search by title and description, original language
   labels, and a mixed list of Medium articles and locally published posts.
 - **About** (`/about`): experience, education, tools, and social links.
 - **Posts** (`/writing/<slug>`): full MDX content, when you add a post.
@@ -40,7 +40,7 @@ When adding dependencies, use `npm install <package>` and commit the updated loc
 Internal navigation uses real links between generated pages. Medium and social
 links open in a new tab. The data flow has a pause control, honors reduced-motion
 preferences, and stops animating when offscreen or in a background tab. Content
-remains readable without JavaScript; filters and animations use React in the browser.
+remains readable without JavaScript; search and animations use React in the browser.
 Fonts are self-hosted through npm packages, with no Google Fonts requests.
 
 ## Publish a post
@@ -85,10 +85,10 @@ Import `willianmrs/personal-site` into Vercel. `vercel.json` already specifies
 `npm ci`, `npm run build`, and the `dist` output directory. No server functions
 or database are required.
 
-Set **`VITE_SITE_URL`** to the final domain, for example `https://your-domain.dev`,
+Set **`VITE_SITE_URL`** to `https://www.willianmoreira.dev`,
 in Vercel's environment variables **before deploying**. For local builds, copy
-`.env.example` to `.env.local` and change its value. The default is
-`https://willianmoreira.com`; replace it if hosting on your new `.dev` domain.
+`.env.example` to `.env.local`. The default is `https://www.willianmoreira.dev`;
+override it when using a different domain.
 This setting controls canonical URLs, Open Graph tags and the sitemap.
 
 The build prerenders every published route. Do not add a catch-all rewrite to

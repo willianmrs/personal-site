@@ -20,6 +20,14 @@ function point(t: number, x0: number, y0: number, endY: number) {
 export function DataFlow() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const syncAnimation = useRef<(() => void) | null>(null);
+
+  const togglePaused = () => {
+    pausedRef.current = !pausedRef.current;
+    setPaused(pausedRef.current);
+    syncAnimation.current?.();
+  };
   useEffect(() => {
     const element = canvas.current;
     const context = element?.getContext('2d');
@@ -27,20 +35,21 @@ export function DataFlow() {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let inView = true;
-    let start: number | undefined;
+    let elapsed = 0;
+    let lastTime: number | undefined;
     const resize = () => {
       const ratio = Math.min(window.devicePixelRatio || 1, 2);
       element.width = W * ratio;
       element.height = H * ratio;
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      draw();
     };
-    const paint = (time: number) => {
-      if (start === undefined) start = time;
+    const draw = () => {
       context.clearRect(0, 0, W, H);
       for (let i = 0; i < paths.length; i++) {
         const path = paths[i];
         for (let j = 0; j < 2; j++) {
-          const t = ((time - start) / (5800 + i % 5 * 500) + i * .137 + j * .5) % 1;
+          const t = (elapsed / (5800 + i % 5 * 500) + i * .137 + j * .5) % 1;
           const p = point(t, path.x, path.y, path.endY);
           context.beginPath();
           context.arc(p.x, p.y, i % 6 === 0 ? 2.4 : 1.6, 0, Math.PI * 2);
@@ -51,13 +60,20 @@ export function DataFlow() {
         }
       }
       context.shadowBlur = 0;
-      if (!paused && !motion.matches && inView && !document.hidden) frame = requestAnimationFrame(paint);
+    };
+    const paint = (time: number) => {
+      if (lastTime !== undefined) elapsed += Math.min(time - lastTime, 100);
+      lastTime = time;
+      draw();
+      if (!pausedRef.current && !motion.matches && inView && !document.hidden) frame = requestAnimationFrame(paint);
     };
     const resume = () => {
       cancelAnimationFrame(frame);
-      if (!paused && !motion.matches && inView && !document.hidden) frame = requestAnimationFrame(paint);
-      else context.clearRect(0, 0, W, H);
+      lastTime = undefined;
+      draw();
+      if (!pausedRef.current && !motion.matches && inView && !document.hidden) frame = requestAnimationFrame(paint);
     };
+    syncAnimation.current = resume;
     const observer = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; resume(); });
     observer.observe(element);
     resize();
@@ -71,8 +87,9 @@ export function DataFlow() {
       motion.removeEventListener('change', resume);
       document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('resize', resize);
+      syncAnimation.current = null;
     };
-  }, [paused]);
+  }, []);
 
   return <div className="data-flow">
     <div className="flow-art" aria-hidden="true">
@@ -88,6 +105,6 @@ export function DataFlow() {
       </svg>
       <canvas ref={canvas} />
     </div>
-    <div className="flow-caption"><span>stream <b>→</b> features <b>→</b> prediction</span><button className="motion-toggle" onClick={() => setPaused(!paused)} aria-label={paused ? 'Play data flow animation' : 'Pause data flow animation'} aria-pressed={paused}>{paused ? '▶' : 'Ⅱ'}</button></div>
+    <div className="flow-caption"><span>stream <b>→</b> features <b>→</b> prediction</span><button className="motion-toggle" type="button" onClick={togglePaused} aria-label={paused ? 'Play data flow animation' : 'Pause data flow animation'} title={paused ? 'Play animation' : 'Pause animation'} aria-pressed={paused}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">{paused ? <path d="m7 4 14 8-14 8Z" /> : <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>}</svg></button></div>
   </div>;
 }

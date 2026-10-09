@@ -1,6 +1,6 @@
 export const site = {
   name: 'Willian Moreira',
-  url: (import.meta.env.VITE_SITE_URL || 'https://willianmoreira.com').replace(/\/$/, ''),
+  url: (import.meta.env.VITE_SITE_URL || 'https://www.willianmoreira.dev').replace(/\/$/, ''),
   description: 'Data platforms, real-time systems, and the people behind them. Writing and experience by Willian Moreira, Lead ML Platform Engineer at iFood.',
 };
 
