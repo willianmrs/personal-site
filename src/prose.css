@@ -1,0 +1,28 @@
+.post { max-width: 820px; margin: 40px auto 65px; }
+.back-link { margin-bottom: 43px; }
+.back-link .arrow { transform: rotate(180deg); }
+.back-link:hover .arrow { transform: rotate(180deg) translateX(3px); }
+.post-header h1 { font-size: clamp(38px, 4.5vw, 65px); line-height: 1.13; letter-spacing: -.045em; font-weight: 660; margin: 20px 0; text-wrap: balance; }
+.post-description { font-size: 19px; color: #bec7d0; line-height: 1.75; }
+.post-meta { display: flex; flex-wrap: wrap; gap: 20px; font: 11px/1.8 var(--mono); color: var(--muted); margin-top: 26px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.prose { font-size: 17px; line-height: 1.95; color: #c7cfd7; overflow-wrap: break-word; }
+.prose h1, .prose h2, .prose h3, .prose h4 { color: #edf0f2; letter-spacing: -.03em; font-weight: 630; line-height: 1.35; margin: 44px 0 18px; }
+.prose h1 { font-size: 38px; }
+.prose h2 { font-size: 30px; }
+.prose h3 { font-size: 23px; }
+.prose h4 { font-size: 19px; }
+.prose p, .prose ul, .prose ol { margin: 20px 0; }
+.prose ul, .prose ol { padding-left: 25px; }
+.prose li { padding-left: 5px; }
+.prose a { color: var(--cyan); text-decoration: underline; text-underline-offset: 4px; }
+.prose code { font: .85em/1.8 var(--mono); padding: 3px 6px; background: #141d22; color: #abedf4; border-radius: 3px; }
+.prose pre { background: #101619; border: 1px solid var(--line); padding: 24px; overflow-x: auto; border-radius: 5px; margin: 26px 0; }
+.prose pre code { padding: 0; background: transparent; color: #c7d6dd; }
+.prose blockquote { border-left: 2px solid var(--cyan); margin: 26px 0; padding: 1px 25px; color: #b8c9d1; }
+.prose img { max-width: 100%; height: auto; border-radius: 5px; }
+.prose table { display: block; overflow: auto; border-collapse: collapse; max-width: 100%; margin: 26px 0; font-size: 14px; }
+.prose th, .prose td { border: 1px solid var(--line); padding: 10px 16px; text-align: left; }
+.prose th { color: #edf0f2; background: #101619; }
+.prose hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
+.post-end { margin-top: 40px; border-top: 1px solid var(--line); width: 100%; padding-top: 25px; }
+@media (max-width: 760px) { .post { margin-top: 28px; } .back-link { margin-bottom: 30px; } .post-description { font-size: 17px; } .prose { font-size: 16px; } .prose pre { padding: 18px; } }
