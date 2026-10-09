@@ -6,7 +6,7 @@ articles keep their original language.
 
 ## Run locally
 
-Requires Node.js 22.12+ and npm. If you use nvm, run `nvm use` first.
+Requires Node.js 22 (22.20 or later) and npm. If you use nvm, run `nvm use` first.
 
 ```sh
 make install
