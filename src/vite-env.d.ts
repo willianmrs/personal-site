@@ -5,4 +5,5 @@ declare module '*.mdx' {
   const component: ComponentType;
   export default component;
   export const meta: import('./content').PostMeta;
+  export const Cover: ComponentType | undefined;
 }

@@ -8,3 +8,6 @@ dist/
 .env.*
 !.env.example
 tmp/
+
+# Local editorial research and review history
+content/editorial/

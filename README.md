@@ -79,6 +79,23 @@ Articles are listed newest first; Home uses a separately curated selection.
 External titles can be translated or shortened for display, without changing the
 original article or its language.
 
+## Review a draft locally
+
+Keep draft MDX files in `content/drafts/` with `draft: true` in their exported
+metadata. They are available at `/drafts/<slug>` through `make run` only. Drafts
+are excluded from Writing, search, the sitemap, production HTML and JavaScript,
+and `make preview`. The development server binds to `127.0.0.1`.
+
+The essay **We Made Coding Faster. Did We Make Engineering Better?** is published
+at `/writing/we-made-coding-faster` and featured on Home. Its opening illustration
+uses the optional exported `Cover` component; `readingMinutes` supplies the reading
+estimate. The original research and review history are kept locally in
+`content/editorial/`, which is excluded from Git.
+
+Only move a draft into `src/content/posts/` after an explicit publication decision.
+`make test` uses a temporary draft fixture to verify local preview and exclusion
+from the production build, and checks the published article and its metadata.
+
 ## Vercel
 
 Import `willianmrs/personal-site` into Vercel. `vercel.json` already specifies

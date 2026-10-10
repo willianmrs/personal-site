@@ -9,8 +9,10 @@ export type PostMeta = {
   topic: Topic;
   tags: string[];
   language: 'EN' | 'PT';
+  readingMinutes?: number;
 };
-export type Article = PostMeta & { source: 'Medium' | 'On this site'; url: string; Body?: ComponentType };
+export type Article = PostMeta & { source: 'Medium' | 'On this site'; url: string; Body?: ComponentType; Cover?: ComponentType };
+export type DraftArticle = Article & { draft: true; reconstructed: boolean };
 
 // Use Medium story permalinks instead of hard-coding the personal domain.
 const external: Article[] = [
@@ -53,7 +55,7 @@ const external: Article[] = [
   },
 ];
 
-const modules = import.meta.glob<{ default: ComponentType; meta: PostMeta }>('./content/posts/*.mdx', { eager: true });
+const modules = import.meta.glob<{ default: ComponentType; meta: PostMeta; Cover?: ComponentType }>('./content/posts/*.mdx', { eager: true });
 const usedSlugs = new Set(external.map((article) => article.slug));
 const local: Article[] = Object.entries(modules).map(([file, module]) => {
   const meta = module.meta;
@@ -67,13 +69,29 @@ const local: Article[] = Object.entries(modules).map(([file, module]) => {
     throw new Error(`Invalid post metadata: ${file}`);
   }
   usedSlugs.add(meta.slug);
-  return { ...meta, source: 'On this site', url: `/writing/${meta.slug}`, Body: module.default };
+  return { ...meta, source: 'On this site', url: `/writing/${meta.slug}`, Body: module.default, Cover: module.Cover };
 });
 
 export const articles: Article[] = [...external, ...local].sort((a, b) => b.date.localeCompare(a.date));
-export const selectedArticles = ['arbitrary-stateful-aggregation-with-spark', 'ifood-feature-platform', 'data-evolution']
+export const selectedArticles = ['we-made-coding-faster', 'arbitrary-stateful-aggregation-with-spark', 'ifood-feature-platform']
   .map((slug) => articles.find((article) => article.slug === slug)!);
 export const localPosts = local;
+
+// Vite replaces DEV with false in production. Drafts are never published posts.
+const draftModules = import.meta.env.DEV
+  ? import.meta.glob<{ default: ComponentType; meta: PostMeta & { draft: true; reconstructed?: boolean }; Cover?: ComponentType }>('../content/drafts/*.mdx', { eager: true })
+  : {};
+export const draftPosts: DraftArticle[] = Object.entries(draftModules).map(([file, module]) => {
+  if (module.meta?.draft !== true || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(module.meta.slug)
+      || usedSlugs.has(module.meta.slug) || !module.meta.title?.trim() || !module.meta.description?.trim()) {
+    throw new Error(`Invalid draft metadata: ${file}`);
+  }
+  usedSlugs.add(module.meta.slug);
+  return {
+    ...module.meta, draft: true, reconstructed: module.meta.reconstructed === true,
+    source: 'On this site', url: `/drafts/${module.meta.slug}`, Body: module.default, Cover: module.Cover,
+  };
+});
 
 export const profiles = {
   github: 'https://github.com/willianmrs',

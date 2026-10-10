@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { articles, localPosts, profiles, selectedArticles } from './content';
+import { articles, draftPosts, localPosts, profiles, selectedArticles, type Article } from './content';
 import { Arrow } from './components/Arrow';
 import { ArticleList } from './components/ArticleList';
 import { DataFlow } from './components/DataFlow';
@@ -12,12 +12,14 @@ const searchArticles = createArticleSearch(articles);
 export function pageMeta(path: string) {
   path = normalizePath(path);
   const post = localPosts.find((article) => article.url === path);
+  const draft = draftPosts.find((article) => article.url === path);
   const pages: Record<string, { title: string; description: string }> = {
     '/': { title: 'Willian Moreira — ML Platform Engineer', description: site.description },
     '/writing': { title: 'Writing — Willian Moreira', description: 'Articles on data systems, Spark, machine learning platforms and Bitcoin by Willian Moreira.' },
     '/about': { title: 'About — Willian Moreira', description: 'From data science to technical leadership. The experience and background of Willian Moreira, Lead ML Platform Engineer at iFood.' },
   };
-  return post ? { title: `${post.title} — Willian Moreira`, description: post.description, post }
+  return draft ? { title: `Draft: ${draft.title} — Willian Moreira`, description: draft.description, draft }
+    : post ? { title: `${post.title} — Willian Moreira`, description: post.description, post }
     : { ...(pages[path] || { title: 'Page not found — Willian Moreira', description: 'This page could not be found.' }), notFound: !pages[path] };
 }
 
@@ -100,10 +102,14 @@ function About() {
 }
 
 function Post({ path }: { path: string }) {
-  const post = localPosts.find((article) => article.url === path);
+  const draft = draftPosts.find((article) => article.url === path);
+  const post: Article | undefined = draft || localPosts.find((article) => article.url === path);
   if (!post?.Body) return <NotFound />;
   const Body = post.Body;
-  return <article className="post"><a className="text-link back-link" href="/writing"><Arrow />All writing</a><header className="post-header"><p className="eyebrow cyan">// {post.tags.join(' · ').toLowerCase()}</p><h1>{post.title}<span className="cyan">.</span></h1><p className="post-description">{post.description}</p><div className="post-meta"><span>Willian Moreira</span><time dateTime={post.date}>{formatDate(post.date)}</time><span>{post.language}</span></div></header><div className="prose"><Body /></div><a className="text-link post-end" href="/writing">More writing<Arrow /></a></article>;
+  const Cover = post.Cover;
+  return <article className="post"><a className="text-link back-link" href="/writing"><Arrow />All writing</a>
+    {draft && <aside className="draft-notice" aria-label="Draft status"><span className="draft-label">Draft · Local preview</span><p>{draft.reconstructed ? 'Reconstructed working draft. Text and research are still under editorial review.' : 'Working draft. Not approved for publication.'}</p></aside>}
+    <header className="post-header"><p className="eyebrow cyan">// {post.tags.join(' · ').toLowerCase()}</p><h1>{post.title}{!/[.!?]$/.test(post.title) && <span className="cyan">.</span>}</h1><p className="post-description">{post.description}</p>{Cover && <Cover />}<div className="post-meta"><span>Willian Moreira</span><span>{draft ? 'Last edited ' : ''}<time dateTime={post.date}>{formatDate(post.date)}</time></span>{post.readingMinutes && <span>{post.readingMinutes} min read</span>}<span>{post.language}</span></div></header><div className="prose"><Body /></div><a className="text-link post-end" href="/writing">More writing<Arrow /></a></article>;
 }
 
 function NotFound() {
@@ -116,11 +122,17 @@ export function App({ path }: { path: string }) {
     const meta = pageMeta(path);
     document.title = meta.title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', meta.description);
+    if (meta.draft) {
+      const robots = document.createElement('meta');
+      robots.name = 'robots';
+      robots.content = 'noindex, nofollow';
+      document.head.append(robots);
+    }
     const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
       if (entry.isIntersecting) { entry.target.classList.add('revealed'); observer.unobserve(entry.target); }
     }), { threshold: .08 });
     document.querySelectorAll('.section-rule, .article-list li').forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); if (meta.draft) document.querySelector('meta[name="robots"]')?.remove(); };
   }, [path]);
-  return <div className="site-shell"><a className="skip-link" href="#main">Skip to content</a><Header path={path} /><main id="main">{path === '/' ? <Home /> : path === '/writing' ? <Writing /> : path === '/about' ? <About /> : path.startsWith('/writing/') ? <Post path={path} /> : <NotFound />}</main><Footer /></div>;
+  return <div className="site-shell"><a className="skip-link" href="#main">Skip to content</a><Header path={path} /><main id="main">{path === '/' ? <Home /> : path === '/writing' ? <Writing /> : path === '/about' ? <About /> : path.startsWith('/writing/') || (import.meta.env.DEV && path.startsWith('/drafts/')) ? <Post path={path} /> : <NotFound />}</main><Footer /></div>;
 }

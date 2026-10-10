@@ -1,0 +1,117 @@
+import { EngineeringFlow } from '../../components/EngineeringFlow';
+
+export const Cover = EngineeringFlow;
+
+export const meta = {
+  slug: 'we-made-coding-faster',
+  title: 'We Made Coding Faster. Did We Make Engineering Better?',
+  description: 'AI has fundamentally changed how quickly we can produce software. But as code generation becomes increasingly inexpensive, a more important question emerges: are we actually improving software engineering, or simply moving its bottlenecks elsewhere?',
+  date: '2026-10-09',
+  topic: 'Data & ML',
+  tags: ['AI Coding', 'Software Engineering', 'SDLC'],
+  language: 'EN',
+  readingMinutes: 12
+}
+
+Software development is going through one of its most significant transformations in decades. Tasks that once required hours of implementation can now be completed in minutes. AI coding assistants have evolved from autocomplete tools into increasingly autonomous agents capable of exploring repositories, implementing features, writing tests, and iterating on their own work. For many engineers, the difference is remarkable. Work that previously required navigating documentation, understanding unfamiliar libraries, and writing substantial amounts of boilerplate can now begin with a conversation. An agent can investigate a repository, propose a solution, implement it, and return with a working pull request.
+
+And the productivity improvements are not merely anecdotal. A [2026 observational study from Microsoft](https://arxiv.org/abs/2606.00438), examining 16,223 engineers across 43 weeks, estimated that developers completed 40.5% more pull requests during their highest GitHub Copilot usage weeks than during weeks without usage, after controlling for measured development effort. Another [study published in Management Science](https://pubsonline.informs.org/doi/10.1287/mnsc.2025.00535), combining three field experiments involving 4,867 developers, estimated a 26.08% increase in completed tasks among developers who adopted the AI coding tool. Those experiments evaluated Copilot autocomplete in 2022–2023. These are meaningful results. AI is changing the economics of software implementation, and dismissing these improvements would be a mistake.
+
+But they also raise a question that deserves more attention.
+
+<aside className="editorial-highlight" aria-label="Central question">
+  <p><strong>If we can produce software substantially faster, does that necessarily mean we are engineering better software?</strong></p>
+</aside>
+
+The distinction matters because software engineering has never been exclusively about producing code. Code is the artifact we create, but the engineering challenge includes understanding the problem, making architectural decisions, preserving system behavior, managing complexity, and ensuring that the software remains reliable as it evolves. AI has dramatically accelerated one part of this process. Whether the rest of the discipline can evolve at the same pace is a different question.
+
+## 1. The Productivity Paradox
+
+For years, engineering organizations have attempted to improve productivity through better development environments, reusable infrastructure, automation, and increasingly sophisticated tooling. AI coding assistants represent an extraordinary improvement in that progression. Yet measuring their impact is surprisingly difficult. Pull requests, completed tasks, and lines of code can help describe development activity. They do not necessarily reveal whether an organization is delivering more business value, creating more reliable systems, or reducing long-term maintenance costs. A developer completing twice as many tasks is not automatically producing twice as much value. Some tasks address critical business problems, while others create additional complexity. Some implementations eliminate entire classes of failure, while others introduce subtle dependencies that become expensive to maintain.
+
+This distinction becomes increasingly important when the marginal cost of generating an implementation approaches zero. In its 2025 research, [Faros AI](https://www.faros.ai/blog/ai-software-engineering) identified what it called the AI productivity paradox: engineering teams were producing more development artifacts, but those gains were not consistently reflected in organization-level delivery improvements. The evidence evolved in 2026. Faros subsequently reported measurable throughput improvements alongside growing pressure on code review, defects, and operational stability.
+
+Faros’s later [Speed Trap report](https://www.faros.ai/blog/ai-speed-trap-takeaways) adds important nuance: deployment frequency improved, code churn fell, and the earlier increase in incidents per pull request was much less pronounced in the newer dataset. Yet total incident volume was higher and remediation was slower in the studied teams. These observational findings suggest that teams can adapt their delivery workflows while still facing greater operational pressure.
+
+The paradox, therefore, is not that AI fails to increase productivity. It is that improvements in local productivity do not necessarily translate into proportional improvements in the performance of the entire engineering organization.
+
+This is a familiar phenomenon in complex systems. Optimizing one component does not guarantee that the system as a whole becomes more efficient.
+
+## 2. When Faster Coding Moves the Bottleneck
+
+Consider a software development process as a sequence of interdependent activities: requirements, design, implementation, review, testing, deployment, and operation. Historically, implementation has consumed a substantial portion of engineering effort. Writing code, understanding APIs, integrating dependencies, and debugging behavior were expensive activities. AI changes that balance. When implementation becomes significantly faster, other stages may become the dominant constraints. An engineer might generate several pull requests in the time previously required to implement one. But those changes still need to be understood, reviewed, validated, integrated, and operated.
+
+The result can resemble a distributed system in which one service suddenly increases its throughput while downstream consumers retain their previous processing capacity. The faster producer does not automatically make the entire system faster. Instead, queues accumulate, processing delays increase, and pressure moves toward the slower components. Software delivery can behave similarly. In its [2026 Acceleration Whiplash report](https://www.faros.ai/research/ai-acceleration-whiplash), Faros reported larger pull requests, longer review cycles, and increasing quality-related pressure in its observed engineering organizations. These findings do not establish that every team adopting AI will experience the same effects. However, they illustrate an important systems-level problem: development workflows designed around human-paced implementation may struggle to absorb substantially faster code production.
+
+This becomes especially relevant as coding agents evolve. With traditional coding assistants, engineers generally remained involved throughout implementation. Agentic workflows increasingly allow a developer to delegate tasks and return later to evaluate completed work. The human role shifts from continuously producing changes toward supervising and validating them. But if every agent-generated artifact requires expensive manual review, the scalability of that model remains limited.
+
+<blockquote className="editorial-quote">
+  <p>We may have removed much of the friction from producing code without removing the friction from establishing confidence in it.</p>
+</blockquote>
+
+## 3. The Emerging Verification Bottleneck
+
+<aside className="editorial-highlight" aria-label="The verification gap">
+  <span className="highlight-label">The verification gap</span>
+  <p>Generating an implementation and proving that it is correct are fundamentally different problems.</p>
+</aside>
+
+A coding agent might implement a new API endpoint in seconds. It can generate handlers, database queries, validation logic, and unit tests. The resulting code may compile, pass its tests, and appear entirely reasonable. But what does that actually establish? Perhaps the endpoint works for the examples included in the tests. Perhaps its dependencies were mocked correctly. Perhaps the implementation satisfies the requirements the agent inferred from its context. None of these guarantees that the implementation preserves every relevant business invariant, handles realistic failure conditions, or interacts correctly with the rest of the system.
+
+Consider a payment-processing service that must never charge the same logical payment twice. Suppose a provider completes a charge, but the response times out before the service records the result. A retry that treats the timeout as a failed charge can create a second charge. A generated implementation might pass unit tests covering successful payments, invalid requests, and common errors. Yet the important engineering questions may involve concurrent requests, retries after timeouts, idempotency boundaries, partial failures, and interactions between independent services. The challenge is not merely whether the code executes successfully. It is whether the system preserves its intended behavior under the conditions that matter. And the agent cannot reliably validate requirements that were never made explicit or cannot be inferred from the available context.
+
+This is where verification becomes more important. Software verification operates at multiple levels. Syntax checks, type systems, unit tests, integration tests, contract tests, performance testing, and operational monitoring provide different kinds of evidence. None independently guarantees complete correctness. Passing a test suite establishes that the implementation satisfied the assertions exercised by that suite. It does not establish that the assertions fully describe the intended behavior. The distinction becomes increasingly consequential as more code is generated automatically. The [2026 Stack Overflow Developer Survey](https://survey.stackoverflow.co/2026/ai/data/ai-trust) offers an interesting perspective on this relationship. Among respondents to its AI trust question, 48% said they trust AI when they can easily verify its output. Only 6.6% said they trust it for many tasks, including important work decisions.
+
+These responses measure developer attitudes rather than the technical correctness of generated code. Nevertheless, they illustrate how closely confidence in AI remains connected to the ability to validate its output. The interesting question is whether verification itself can be transformed. AI can already generate tests, inspect implementations, analyze failures, and evaluate changes against specifications. Increasingly capable agents may automate significant parts of the verification process. But automating verification is not simply a matter of asking a second model whether the first model's implementation looks correct.
+
+If both agents operate from the same incomplete understanding of the requirements, they can agree on an implementation that is consistently wrong. Independent evidence matters. Explicit behavioral contracts, executable specifications, integration environments, property-based testing, invariant checking, and production feedback can provide stronger foundations for automated validation. This leads to a hypothesis:
+
+<blockquote className="editorial-quote">
+  <p>As the cost of generating software decreases, the ability to produce trustworthy evidence about its correctness may become one of the most valuable capabilities in software engineering.</p>
+</blockquote>
+
+The next major productivity improvement may not come exclusively from generating code faster. It may come from making correctness substantially cheaper to establish.
+
+## 4. Software Engineering Is More Than Code Production
+
+There is another consequence of inexpensive implementation: it forces us to reconsider what we mean by software engineering. For much of the profession's history, writing code has been the most visible part of engineering work. We learn programming languages, study algorithms, understand frameworks, and spend years becoming more proficient at translating requirements into implementations. Those skills remain relevant. But code production has never represented the complete discipline. Engineering begins before implementation. It involves understanding why a system should exist, identifying constraints, choosing abstractions, evaluating trade-offs, and deciding which problems are worth solving.
+
+A system can contain technically correct code while still expressing a poor architecture. It can pass every existing test while making future changes unnecessarily difficult. It can satisfy an immediate requirement while introducing an operational dependency that becomes a significant liability. These are not necessarily failures of code generation. They are failures of engineering judgment, system design, or problem understanding. The maintainability dimension is particularly interesting. In its [2026 Maintainability Gap report](https://www.gitclear.com/the_ai_code_quality_maintainability_gap), GitClear analyzed approximately 623 million code changes and reported increases in code duplication alongside declines in several indicators associated with reuse and refactoring.
+
+These observations deserve methodological caution. Repository-level trends do not establish that AI caused the observed trends, and maintainability cannot be fully described by a small collection of metrics. Still, they reinforce a legitimate concern: faster implementation can create long-term costs when code generation is not accompanied by disciplined architectural decisions. The ability to generate another abstraction, another handler, or another service does not mean introducing it is the right engineering decision. Sometimes the best implementation is to remove code, simplify a dependency, or avoid building a feature altogether.
+
+That is why the engineer's role should not be reduced to writing prompts or approving pull requests. As coding agents become more capable, engineers may spend proportionally less time manually producing implementations and more time defining behavior, shaping architecture, examining evidence, and managing the evolution of complex systems. This is not necessarily a reduction in engineering work. It is a change in where that work creates value.
+
+## 5. Rethinking the Software Development Lifecycle
+
+Most contemporary software development workflows were designed around a fundamental assumption: implementation is performed primarily by humans. We organize work into tasks, assign those tasks to developers, write code, open pull requests, review changes, execute tests, and deploy the resulting software. AI coding assistants initially entered this workflow as productivity tools. They accelerated individual activities without fundamentally changing the structure around them. Autonomous coding agents challenge that assumption. If an agent can investigate a repository, develop an implementation, execute tests, correct failures, and prepare a change for integration, should we continue organizing the entire lifecycle around the same sequence of human interventions?
+
+Or should we reconsider the lifecycle itself? One possible direction is to make behavioral expectations more explicit before implementation begins. Rather than relying on a loosely described task followed by manual inspection of generated code, engineering workflows could increasingly begin with specifications that describe expected behavior, relevant constraints, and the evidence required for acceptance. Behavior-Driven Development provides one useful vocabulary for this approach, particularly when expressing observable system behavior. But the opportunity extends beyond BDD. Contracts, invariants, architectural constraints, security requirements, and operational expectations can all contribute to a more complete description of what successful implementation means.
+
+An agent could then operate within a controlled feedback loop: investigate the system, propose a change, implement it, execute relevant verification, inspect the results, and iterate until the required conditions are satisfied or a meaningful uncertainty requires human judgment. The important distinction is that success would not be defined exclusively by whether code was generated or whether a task was marked complete. It would be defined by the evidence supporting the resulting system behavior. This approach also changes how we should think about human involvement.
+
+A human approval step is not automatically valuable simply because a human performed it. Repeated approval requests with little context can create fatigue while contributing limited confidence. At the same time, eliminating human review without establishing reliable alternatives can introduce unacceptable risks. The objective should not be to maximize or minimize human intervention indiscriminately. It should be to concentrate human attention where judgment, uncertainty, and consequences make it valuable. Low-risk, well-specified changes with strong automated verification may require little intervention. High-impact architectural changes, sensitive business logic, and decisions involving ambiguous requirements may justify substantially more scrutiny.
+
+That distinction becomes increasingly important as agents execute longer and more autonomous development workflows. A genuinely AI-native SDLC may therefore require more than integrating coding agents into existing tools. It may require different approaches to specification, verification, responsibility, observability, and software ownership. The challenge is not simply to make agents better at writing code. It is to build an engineering process capable of establishing confidence in the software they produce.
+
+## Final Thoughts
+
+AI coding tools have already changed how software is developed, and their capabilities will continue to evolve. The productivity improvements are real. Tasks that once consumed substantial engineering time can now be completed far more quickly, and increasingly autonomous agents are expanding the scope of what can be delegated. But software engineering has never been measured solely by how quickly we can produce an implementation. Its value comes from delivering systems that solve the right problems, behave correctly, remain maintainable, and continue operating reliably as requirements and environments change.
+
+The research emerging in 2026 suggests that faster code production can coexist with increased pressure on verification, maintainability, and operational stability. It does not prove that AI makes engineering worse. Nor does it establish that those challenges are unavoidable. It suggests that improving code-generation productivity and improving engineering effectiveness are related, but distinct, goals. Perhaps the most important change ahead is not that engineers will stop writing code. It is that writing code may become a smaller part of what determines engineering effectiveness.
+
+**We made coding faster. The next challenge is making software engineering better.**
+
+<section className="research-references" aria-labelledby="research-references">
+  <h2 id="research-references">Research &amp; references</h2>
+  <p>The research behind this article includes experimental studies, observational analyses, and industry reports. Publication dates and measurement periods differ; activity metrics, survey responses, and maintainability proxies describe different aspects of engineering.</p>
+  <ol>
+    <li><a href="https://arxiv.org/abs/2606.00438">GitHub Copilot and Developer Productivity: An Observational Dose-Response Analysis</a><span>Microsoft Research · 2026. Observational analysis of developer activity; estimates do not directly measure quality or business value.</span></li>
+    <li><a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2025.00535">The Effects of Generative AI on High-Skilled Work: Evidence from Three Field Experiments with Software Developers</a><span>Management Science · 2026 journal publication. The reported effect concerns tool adoption, rather than access alone. Experiments conducted in 2022–2023 evaluated Copilot autocomplete.</span></li>
+    <li><a href="https://survey.stackoverflow.co/2026/ai/data/ai-trust">Trust in AI Tools</a><span>Stack Overflow Developer Survey · 2026. Self-reported attitudes toward AI, rather than a measurement of generated code correctness.</span></li>
+    <li><a href="https://www.gitclear.com/the_ai_code_quality_maintainability_gap">The Maintainability Gap: AI Code Quality in 2026</a><span>GitClear · 2026. Repository-level trends and maintainability proxies; causal interpretation requires care.</span></li>
+    <li><a href="https://www.faros.ai/research/ai-acceleration-whiplash">The Acceleration Whiplash</a><span>Faros AI · 2026. Observational engineering telemetry from the studied organizations.</span></li>
+    <li><a href="https://www.faros.ai/blog/ai-speed-trap-takeaways">The Speed Trap</a><span>Faros AI · Q3 2026. Follow-up context on deeper AI adoption and evolving engineering constraints.</span></li>
+    <li><a href="https://www.faros.ai/blog/ai-software-engineering">The AI Productivity Paradox</a><span>Faros AI · 2025. Historical context for the distinction between individual activity and organizational delivery.</span></li>
+  </ol>
+</section>

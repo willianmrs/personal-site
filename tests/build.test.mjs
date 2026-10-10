@@ -9,7 +9,8 @@ test('every page ships its content and metadata as static HTML', async () => {
     const html = await readFile(path, 'utf8');
     assert.match(html, /<html lang="en">/);
     assert.match(html, /<main id="main">[\s\S]+<\/main>/);
-    assert.equal((html.match(/<title>/g) || []).length, 1);
+    const head = html.match(/<head>[\s\S]*?<\/head>/)[0];
+    assert.equal((head.match(/<title>/g) || []).length, 1);
     assert.equal((html.match(/name="description"/g) || []).length, 1);
     assert.ok(html.includes(`rel="canonical" href="${new URL(route, site.url).href}"`));
     assert.doesNotMatch(html, /<!--(?:app-html|page-head)-->/);
