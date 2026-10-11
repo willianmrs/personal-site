@@ -84,27 +84,34 @@ export function SignalTimeline() {
         <text x="357" y="228" textAnchor="end" className="figure-accent">14:06:45 · count = 6</text>
       </g>
     </svg>
-    <svg className="timeline-mobile" viewBox="0 0 320 344" role="img" aria-labelledby={`${id}-mobile-title ${id}-mobile-description`}>
+    <svg className="timeline-mobile" viewBox="0 0 320 444" role="img" aria-labelledby={`${id}-mobile-title ${id}-mobile-description`}>
       <title id={`${id}-mobile-title`}>Recent events must arrive before the decision</title>
-      <desc id={`${id}-mobile-description`}>At 14:04 the periodic feature value is two. Four new transactions happen between 14:05 and 14:06:30. A faster update makes six available at 14:06:45. The model makes a decision at 14:07, before the next periodic update at 14:09.</desc>
+      <desc id={`${id}-mobile-description`}>Three separate tracks compare events, periodic updates, and a faster update path on a shared timeline. At 14:04 the periodic feature value is two. Four new transactions happen between 14:05 and 14:06:30. The faster path makes six available at 14:06:45. At the 14:07 decision, the periodic path still provides two while the faster path provides six. The next periodic update at 14:09 is too late for that decision.</desc>
       <g aria-hidden="true">
-        <path d="M16 23V320" stroke="#34444e" strokeWidth="2" />
-        <circle cx="16" cy="27" r="5" fill="#adb5bf" />
-        <text x="36" y="25" className="figure-label">14:04 · periodic update</text>
-        <text x="36" y="46">count = 2</text>
-        {[90, 103, 116, 129].map((y) => <circle key={y} cx="16" cy={y} r="4" fill="#20d9e9" />)}
-        <text x="36" y="101" className="figure-label">14:05–14:06:30</text>
-        <text x="36" y="122">4 new transactions</text>
-        <circle cx="16" cy="174" r="5" fill="#20d9e9" />
-        <text x="36" y="172" className="figure-label">14:06:45 · faster update</text>
-        <text x="36" y="193" className="figure-accent">count = 6</text>
-        <rect x="3" y="220" width="314" height="51" rx="4" fill="#102a30" />
-        <circle cx="16" cy="241" r="5" fill="#20d9e9" />
-        <text x="36" y="242" className="figure-accent">14:07 · model decision</text>
-        <text x="36" y="261" className="figure-small">Which update is available?</text>
-        <circle cx="16" cy="315" r="5" fill="#adb5bf" />
-        <text x="36" y="313" className="figure-label">14:09 · next periodic update</text>
-        <text x="36" y="334">After the decision</text>
+        <text x="48" y="16" textAnchor="middle" className="figure-label">Events</text>
+        <text x="160" y="16" textAnchor="middle" className="figure-label">Periodic</text>
+        <text x="272" y="16" textAnchor="middle" className="figure-label">Faster path</text>
+        <path d="M48 36V94M48 135V193M48 235V284M160 36V40M160 66V81M160 110V300M160 354V367M160 392V410M272 36V220M272 244V260M272 287V300" stroke="#34444e" strokeWidth="2" />
+        <text x="160" y="57" textAnchor="middle">14:04</text>
+        <circle cx="160" cy="72" r="5" fill="#adb5bf" />
+        <text x="160" y="96" textAnchor="middle">count = 2</text>
+        <text x="48" y="112" textAnchor="middle">14:05–</text>
+        <text x="48" y="128" textAnchor="middle">14:06:30</text>
+        {[145, 158, 171, 184].map((y) => <circle key={y} cx="48" cy={y} r="4" fill="#20d9e9" />)}
+        <text x="48" y="208" textAnchor="middle" className="figure-small">4 new</text>
+        <text x="48" y="223" textAnchor="middle" className="figure-small">transactions</text>
+        <text x="272" y="235" textAnchor="middle" className="figure-accent">14:06:45</text>
+        <circle cx="272" cy="250" r="5" fill="#20d9e9" />
+        <text x="272" y="274" textAnchor="middle" className="figure-accent">count = 6</text>
+        <rect x="3" y="300" width="314" height="54" rx="4" fill="#102a30" />
+        <text x="160" y="320" textAnchor="middle" className="figure-accent">14:07 · model decision</text>
+        <text x="48" y="344" textAnchor="middle" className="figure-small">Available:</text>
+        <text x="160" y="344" textAnchor="middle">count = 2</text>
+        <text x="272" y="344" textAnchor="middle" className="figure-accent">count = 6</text>
+        <text x="160" y="382" textAnchor="middle">14:09</text>
+        <circle cx="160" cy="399" r="5" fill="#adb5bf" />
+        <text x="160" y="423" textAnchor="middle">next periodic update</text>
+        <text x="160" y="440" textAnchor="middle" className="figure-small">After the decision</text>
       </g>
     </svg>
   </Figure>;
