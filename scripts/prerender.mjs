@@ -7,6 +7,7 @@ if (!['https:', 'http:'].includes(base.protocol) || base.pathname !== '/') {
   throw new Error('VITE_SITE_URL must be a complete origin such as https://example.dev');
 }
 const escape = (text) => String(text).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+const sitemapEntries = [];
 const template = await readFile('dist/index.html', 'utf8');
 if (!template.includes('<!--app-html-->') || !template.includes('<!--page-head-->')) {
   throw new Error('The build template is missing its prerender placeholders.');
@@ -18,13 +19,18 @@ for (const route of [...routes, '/404']) {
   const structured = meta.post ? {
     '@context': 'https://schema.org', '@type': 'BlogPosting', headline: meta.post.title,
     description: meta.description, datePublished: meta.post.date,
-    author: { '@type': 'Person', name: site.name }, url: canonical,
+    ...(meta.post.dateModified ? { dateModified: meta.post.dateModified } : {}),
+    author: { '@type': 'Person', name: site.name, url: new URL('/about', base).href }, url: canonical,
   } : route === '/' ? {
     '@context': 'https://schema.org', '@type': 'Person', name: site.name, url: canonical,
     jobTitle: 'Lead Machine Learning Platform Engineer',
     worksFor: { '@type': 'Organization', name: 'iFood' },
     sameAs: ['https://github.com/willianmrs', 'https://www.linkedin.com/in/willianmrs/'],
   } : null;
+  if (!meta.notFound) {
+    const lastModified = meta.post ? meta.post.dateModified || meta.post.date : undefined;
+    sitemapEntries.push(`<url><loc>${escape(canonical)}</loc>${lastModified ? `<lastmod>${escape(lastModified)}</lastmod>` : ''}</url>`);
+  }
   const head = [
     `<title>${escape(meta.title)}</title>`,
     `<meta name="description" content="${escape(meta.description)}" />`,
@@ -48,5 +54,5 @@ for (const route of [...routes, '/404']) {
   console.log(`Prerendered ${route}`);
 }
 
-await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${routes.map((route) => `<url><loc>${escape(new URL(route, base).href)}</loc></url>`).join('\n')}\n</urlset>\n`);
+await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries.join('\n')}\n</urlset>\n`);
 await writeFile('dist/robots.txt', `User-agent: *\nAllow: /\nSitemap: ${new URL('/sitemap.xml', base).href}\n`);

@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import { isValidContentDate } from './lib/content-date';
 
 export type Topic = 'Data & ML' | 'Bitcoin';
 export type PostMeta = {
@@ -6,6 +7,7 @@ export type PostMeta = {
   title: string;
   description: string;
   date: string;
+  dateModified?: string;
   topic: Topic;
   tags: string[];
   language: 'EN' | 'PT';
@@ -62,11 +64,13 @@ const local: Article[] = Object.entries(modules).map(([file, module]) => {
   if (!meta || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(meta.slug) || usedSlugs.has(meta.slug)) {
     throw new Error(`Missing, invalid or duplicate post slug: ${file}`);
   }
-  if (!meta.title?.trim() || !meta.description?.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(meta.date)
-      || !Number.isFinite(Date.parse(meta.date)) || new Date(meta.date).toISOString().slice(0, 10) !== meta.date
+  if (!meta.title?.trim() || !meta.description?.trim() || !isValidContentDate(meta.date)
       || !['Data & ML', 'Bitcoin'].includes(meta.topic) || !['EN', 'PT'].includes(meta.language)
       || !Array.isArray(meta.tags) || !meta.tags.every((tag) => typeof tag === 'string')) {
     throw new Error(`Invalid post metadata: ${file}`);
+  }
+  if (meta.dateModified !== undefined && !isValidContentDate(meta.dateModified, meta.date)) {
+    throw new Error(`Invalid post modification date: ${file}`);
   }
   usedSlugs.add(meta.slug);
   return { ...meta, source: 'On this site', url: `/writing/${meta.slug}`, Body: module.default, Cover: module.Cover };

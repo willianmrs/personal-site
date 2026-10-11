@@ -5,6 +5,7 @@
 .post-header h1 { font-size: clamp(38px, 4.5vw, 65px); line-height: 1.13; letter-spacing: -.045em; font-weight: 660; margin: 20px 0; text-wrap: balance; }
 .post-description { font-size: 19px; color: #bec7d0; line-height: 1.75; }
 .post-meta { display: flex; flex-wrap: wrap; gap: 20px; font: 11px/1.8 var(--mono); color: var(--muted); margin-top: 26px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.post-meta a:hover { color: var(--cyan); }
 .prose { font-size: 18px; line-height: 1.85; color: #c7cfd7; overflow-wrap: break-word; }
 .prose strong { color: #edf0f2; font-weight: 620; }
 .prose h1, .prose h2, .prose h3, .prose h4 { color: #edf0f2; letter-spacing: -.03em; font-weight: 630; line-height: 1.35; margin: 44px 0 18px; }

@@ -73,6 +73,18 @@ The build validates metadata, adds each post to Writing, generates its HTML and
 includes its URL in the sitemap. Markdown supports tables, code blocks, images,
 and links. MDX can import interactive React components too.
 
+`date` is the original publication date. Add or update the optional
+`dateModified: 'YYYY-MM-DD'` when making a meaningful change to an article,
+including its content, author information, illustrations, or structured data.
+It must be a real calendar date on or after publication. An update after the
+publication date is also shown in the article's byline.
+
+The build adds the author's `/about` URL and `dateModified`, when supplied, to
+each article's structured data. Article sitemap entries use `dateModified` or,
+for an unchanged article, its publication date as `lastmod`. These dates never
+advance just because another deployment runs. Pages without a recorded content
+date omit `lastmod`.
+
 Store post images under `public/images/` and reference them with `/images/file.webp`.
 To add an external article, edit the `external` list in `src/content.ts`.
 Articles are listed newest first; Home uses a separately curated selection.

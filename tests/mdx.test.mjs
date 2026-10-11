@@ -16,7 +16,8 @@ test('a real MDX file becomes a local post, with Markdown and React components',
 export const meta = {
   slug: '${slug}', title: 'MDX integration fixture',
   description: 'Temporary content used only by the test.',
-  date: '2026-10-09', topic: 'Data & ML', tags: ['Testing'], language: 'EN'
+  date: '2024-08-31', dateModified: '2025-05-03',
+  topic: 'Data & ML', tags: ['Testing'], language: 'EN'
 }
 
 export function Example() { return <button type="button">A React component</button> }
@@ -37,6 +38,9 @@ This paragraph has **strong emphasis**.
     assert.ok(entry.routes.includes(route));
     const { html, meta } = entry.render(route);
     assert.equal(meta.post.slug, slug);
+    assert.equal(meta.post.date, '2024-08-31');
+    assert.equal(meta.post.dateModified, '2025-05-03');
+    assert.match(html, /Updated <time dateTime="2025-05-03">May 3, 2025<\/time>/);
     assert.match(html, /<h2>A Markdown heading<\/h2>/);
     assert.match(html, /<strong>strong emphasis<\/strong>/);
     assert.match(html, /<table>/);

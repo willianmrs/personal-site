@@ -49,3 +49,28 @@ test('sitemap contains published routes and excludes the template and 404', asyn
   for (const route of routes) assert.ok(xml.includes(new URL(route, site.url).href));
   assert.doesNotMatch(xml, /your-post-slug|\/404/);
 });
+
+test('article authors and dates agree across the page, structured data, and sitemap', async () => {
+  const sitemap = await readFile('dist/sitemap.xml', 'utf8');
+  const entries = [...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(match => match[1]);
+  for (const route of routes) {
+    const { meta } = render(route);
+    const url = new URL(route, site.url).href;
+    const entry = entries.find(value => value.includes(`<loc>${url}</loc>`));
+    assert.ok(entry, `Missing sitemap entry for ${route}`);
+    if (!meta.post) {
+      assert.doesNotMatch(entry, /<lastmod>/);
+      continue;
+    }
+    const output = await readFile(`dist${route}.html`, 'utf8');
+    const structured = JSON.parse(output.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.equal(structured.author.url, new URL('/about', site.url).href);
+    assert.equal(structured.datePublished, meta.post.date);
+    assert.equal(structured.dateModified, meta.post.dateModified);
+    assert.match(output, /<a href="\/about" rel="author">Willian Moreira<\/a>/);
+    assert.ok(entry.includes(`<lastmod>${meta.post.dateModified || meta.post.date}</lastmod>`));
+    if (meta.post.dateModified > meta.post.date) {
+      assert.ok(output.includes(`Updated <time dateTime="${meta.post.dateModified}">`));
+    }
+  }
+});
