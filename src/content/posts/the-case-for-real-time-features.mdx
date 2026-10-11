@@ -1,0 +1,68 @@
+import { FreshnessStyles, SignalTimeline, FeatureSnapshots, UpdateStrategies } from '../../components/FreshnessFigures';
+
+export const meta = {
+  slug: 'the-case-for-real-time-features',
+  title: 'The Case for Real-Time Features: When Freshness Matters',
+  description: 'Some signals lose value while your pipeline waits. Why feature freshness matters for ML decisions, and when real-time updates are worth the complexity.',
+  date: '2026-10-10',
+  topic: 'Data & ML',
+  tags: ['Real-Time Features', 'Streaming', 'Feature Engineering'],
+  language: 'EN',
+  readingMinutes: 6
+}
+
+<FreshnessStyles />
+
+A user makes four transactions in less than two minutes. Another transaction arrives, and a model must decide whether it looks suspicious. One of its inputs is simple: how many transactions has this user made in the last ten minutes?
+
+The answer depends on what the feature pipeline has seen and made available. If its last update happened before that burst of activity, the model receives a count that misses the behavior it is supposed to help detect. The lookup can be fast, the service healthy, and the prediction delivered on time. The recent signal is still absent.
+
+This is the practical case for real-time features: some information becomes useful only if it reaches a decision while that decision can still benefit from it. Before choosing a processing engine or a feature store, it is worth asking how quickly the relevant behavior changes, and how long we can afford to wait before the model sees it.
+
+## When the signal arrives too late
+
+Consider an illustrative pipeline that refreshes our transaction count every five minutes. At 14:04, it stores a value of two. Four more transactions happen between 14:05 and 14:06:30. At 14:07, the next transaction needs a risk assessment, but the next scheduled feature update is at 14:09.
+
+The model still sees two previous transactions. A pipeline that has already incorporated the four new events would provide six. For simplicity, assume the original two remain inside the ten-minute window, all events are distinct, and the transaction being assessed is excluded from the count.
+
+<SignalTimeline />
+
+Neither count determines the outcome by itself. The model may use many other inputs, and a burst of transactions can be legitimate. But the two predictions are made with different information. If recent transaction velocity is a useful signal, the slower update path prevents the model from using it at this decision point.
+
+Similar situations appear in personalization. A user can spend a session exploring a category that barely appears in their longer-term history. Recent interactions may help a recommender recognize that shift while the session is still active.
+
+There is a concrete example in [Airbnb's work on its sequence recommender](https://airbnb.tech/ai-ml/the-guest-journey-updated-in-real-time-extending-airbnbs-sequence-recommender-with-chronon/). Its engineering team describes replacing daily embedding updates with a pipeline where updates often arrive within 10–30 seconds of guest activity. The team reports improvements in ranking evaluation and bookings. This is evidence for that particular system, rather than a guarantee that every model benefits equally from fresher inputs.
+
+## Freshness is part of what the feature means
+
+A feature definition usually specifies an entity, a calculation, and perhaps a time window. “Transactions per user in the last ten minutes” sounds complete. But a production decision also needs an expectation about how recently that calculation incorporates relevant events.
+
+In our example, a three-minute-old snapshot omits four of the six previous transactions. For a slowly changing attribute, the same delay might have little consequence. Feature freshness matters in relation to the signal and its use, rather than through a universal rule that every value must be updated within milliseconds.
+
+<FeatureSnapshots />
+
+Serving latency and freshness answer different questions. Serving latency describes how quickly the model retrieves a value. Freshness concerns whether relevant changes have reached that value in time. An online store can serve periodically computed features: [Feast's documentation](https://docs.feast.dev/getting-started/components/online-store) explicitly describes materializing batch data into a store built for low-latency reads. Making retrieval faster does not, by itself, change the update schedule.
+
+Here, “real-time features” means features whose update path keeps relevant information within the delay their decisions can tolerate. That can involve streaming updates or computation during the request; it does not require every feature to use the same mechanism.
+
+Measuring freshness also requires care. A newly written value can still be based on a delayed source. Conversely, an inactive user may have no recent events to incorporate, so an old event timestamp does not automatically mean a broken pipeline. Useful monitoring combines source and processing progress with the availability of feature updates, including whether time-windowed values expire correctly as time passes.
+
+## Choose the update path around the decision
+
+The first question is how long a relevant change can remain invisible before it affects the usefulness of the prediction. That gives us a freshness requirement to design and test against.
+
+Streaming computation can maintain aggregates as new events arrive. Request-time computation can derive features from the current request, such as a relationship between the purchase amount and a stored spending baseline. Periodic batch updates remain useful for signals whose tolerated delay is longer. A single prediction can combine all three, and a request-time calculation still depends on the freshness of any stored inputs it reads.
+
+<UpdateStrategies />
+
+Feature stores and platforms help organize these paths, retain history, and make values available to models. The freshness requirement still belongs to the feature and the decision it supports. In an [August 2026 architecture article](https://aws.amazon.com/blogs/big-data/powering-agentic-ai-with-real-time-streaming-data-on-aws/), AWS describes computing features from streaming events and feeding two paths: inference on each event or window, and historical storage for training. This illustrates how a shared computation path can supply recent signals to decisions while retaining them for later model development.
+
+Faster updates bring costs: continuously running infrastructure, state management, recovery, and handling late or duplicate events. Freshness also cannot replace correctness. A quickly updated count that double-counts retries gives the model a different kind of misleading input.
+
+The investment should therefore be tested against the decision we want to improve. Replay historical decisions with feature updates delayed by realistic amounts. Preserve what would actually have been available at each historical decision, so the evaluation does not borrow future information. Examine model quality and the relevant business outcome alongside the cost of operating the faster path.
+
+## The useful deadline
+
+The strongest reason to build real-time features is a signal whose value depends on arriving soon enough. In our transaction example, waiting until 14:09 may produce a more complete count, but it cannot change a decision already made at 14:07.
+
+That is the deadline worth designing around: the time between a meaningful change in the world and the decision that needs to see it. Freshness becomes valuable when closing that gap gives the model information it can use.

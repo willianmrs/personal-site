@@ -73,7 +73,7 @@ const local: Article[] = Object.entries(modules).map(([file, module]) => {
 });
 
 export const articles: Article[] = [...external, ...local].sort((a, b) => b.date.localeCompare(a.date));
-export const selectedArticles = ['we-made-coding-faster', 'arbitrary-stateful-aggregation-with-spark', 'ifood-feature-platform']
+export const selectedArticles = ['the-case-for-real-time-features', 'we-made-coding-faster', 'arbitrary-stateful-aggregation-with-spark', 'ifood-feature-platform']
   .map((slug) => articles.find((article) => article.slug === slug)!);
 export const localPosts = local;
 

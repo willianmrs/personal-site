@@ -92,6 +92,11 @@ uses the optional exported `Cover` component; `readingMinutes` supplies the read
 estimate. The original research and review history are kept locally in
 `content/editorial/`, which is excluded from Git.
 
+**The Case for Real-Time Features: When Freshness Matters** is published at
+`/writing/the-case-for-real-time-features` and featured first on Home. It includes
+three responsive illustrations from `src/components/FreshnessFigures.tsx` and
+has a six-minute reading estimate.
+
 Only move a draft into `src/content/posts/` after an explicit publication decision.
 `make test` uses a temporary draft fixture to verify local preview and exclusion
 from the production build, and checks the published article and its metadata.
